@@ -39,15 +39,59 @@
  *     the scope of his variables and of course, makes use of
  *     event delegation, to keep his event listeners tidied up!
  *
- *     You - 2026-03-25
+ *     Iva Grgic - 2026-04-14
  *******************************************************/
-let sumExpenses = 0; //Use this variable to keep the sum up to date.
+let sumExpenses = 0; // Diese Variable muss ganz oben stehen!
 
-function submitForm(e){
-    //TODO: Prevent the default behavior of the submit button.
-    //TODO: Validate the form. If everything is fine, add the expense to the tracker and reset the form.
+// TODO: Prevent the default behavior of the submit button.
+// TODO: Validate the form. If everything is fine, add the expense to the tracker and reset the form.
+function submitForm(e) {
+    e.preventDefault();
+
+    const dateEl = document.getElementById('date');
+    const amountEl = document.getElementById('amount');
+    const expenseEl = document.getElementById('expense');
+
+    const amount = parseFloat(amountEl.value);
+
+
+    if (isEmpty(dateEl.value)) return dateEl.focus();
+    if (isNaN(amount) || amount < 0.01) return amountEl.focus();
+    if (expenseEl.value.length < 3) return expenseEl.focus();
+
+    const tbody = document.querySelector('#expenses tbody');
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+        <td>${dateEl.value}</td>
+        <td>${formatEuro(amount)}</td>
+        <td>${expenseEl.value}</td>
+        <td><button class="delete-btn" data-val="${amount}">Delete</button></td>
+    `;
+
+    tbody.appendChild(row);
+
+    // sum of logged expenses wird erhöht
+    sumExpenses += amount;
+    document.getElementById('expenseSum').innerText = formatEuro(sumExpenses);
+    e.target.reset();
 }
 
+// delete button
+document.getElementById('expenses').addEventListener('click', function(e) {
+    if (e.target.classList.contains('delete-btn')) {
+        const amountToSubtract = parseFloat(e.target.getAttribute('data-val'));
+
+        // sum of logged expenses wird verringert wenn delete
+        sumExpenses -= amountToSubtract;
+        document.getElementById('expenseSum').innerText = formatEuro(sumExpenses);
+
+        // Zeile löschen
+        e.target.closest('tr').remove();
+    }
+});
+
+document.querySelector('form').addEventListener('submit', submitForm);
 
 /*****************************
  * DO NOT CHANGE CODE BELOW.
